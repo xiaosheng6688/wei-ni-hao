@@ -1,0 +1,17 @@
+{
+  "background_color": "#FFF0F5",
+  "display": "standalone",
+  "lang": "en",
+  "name": "WeiNiHao",
+  "short_name": "WeiNiHao",
+  "start_url": "/?utm_source=web_app_manifest",
+  "orientation": "portrait",
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "http://play.google.com/store/apps/details?id=com.weinihao.app",
+      "id": "com.weinihao.app"
+    }
+  ],
+  "prefer_related_applications": true
+}
