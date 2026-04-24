@@ -1,0 +1,14 @@
+[build]
+  command = "npx expo export --platform web"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "18"
+
+# 移除密码保护（匿名部署默认有密码）
+[[headers]]
+  for = "/*"
+  [headers.headers]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"

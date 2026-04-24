@@ -1,0 +1,25 @@
+{
+  "id": "session-1777009250481-gx1wzq",
+  "name": "为你好应用-紧急完成通义千问+5功能",
+  "status": "active",
+  "createdAt": "2026-04-24T06:25:14.214Z",
+  "updatedAt": "2026-04-24T14:14:31.418Z",
+  "agents": [
+    {
+      "id": "agent_aekjzyp3",
+      "name": "Main Agent",
+      "role": "assistant",
+      "status": "idle",
+      "createdAt": "2026-04-24T06:25:14.214Z",
+      "model": "unknown",
+      "systemPrompt": ""
+    }
+  ],
+  "summary": {
+    "id": "summary_vtl1ligr",
+    "title": "为你好应用-紧急完成通义千问+5功能",
+    "createdAt": "2026-04-24T06:25:14.215Z",
+    "file": "summary_vtl1ligr.md"
+  },
+  "lastMessageCount": 50
+}

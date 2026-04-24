@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🌸 为你好 - AI情绪治愈</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--pink:#FF7EB3;--pink-light:#FFF0F5;--pink-dark:#E8607A;--gold:#D4A574;--gold-light:#F5E6D3;--lavender:#B8A9E8;--mint:#7ECEC0;--white:#FFFFFF;--bg:#FFFAF5;--text:#3D3D3D;--text-light:#888;--shadow:0 2px 20px rgba(255,126,179,0.15);--shadow-lg:0 8px 32px rgba(255,126,179,0.25)}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;-webkit-font-smoothing:antialiased}
+.app{display:flex;flex-direction:column;height:100vh;max-width:480px;margin:0 auto;position:relative}
+.header{background:linear-gradient(135deg,var(--pink),#FF9EC6);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.header h1{font-size:17px;font-weight:600;display:flex;align-items:center;gap:6px}
+.header-right{font-size:11px;opacity:.85;background:rgba(255,255,255,.2);padding:3px 10px;border-radius:12px}
+.tab-bar{display:flex;background:#fff;border-bottom:1px solid #f0e0e8;flex-shrink:0;overflow-x:auto}
+.tab{flex:1;min-width:55px;padding:10px 0;text-align:center;font-size:11px;color:var(--text-light);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap}
+.tab.active{color:var(--pink);border-bottom-color:var(--pink);font-weight:600}
+.tab-emoji{font-size:14px;display:block;margin-bottom:2px}
+.content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overflow-x:hidden}
+.page{display:none;height:100%}
+.page.active{display:flex;flex-direction:column}
+
+/* HOME */
+.page-home{flex:1;overflow-y:auto;padding:16px 16px 70px}
+.greeting{font-size:21px;font-weight:700;margin-bottom:2px;background:linear-gradient(135deg,var(--pink),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.greeting-sub{font-size:12px;color:var(--text-light);margin-bottom:14px}
+.quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.action-card{background:#fff;border-radius:16px;padding:14px 12px;cursor:pointer;transition:all .2s;box-shadow:var(--shadow)}
+.action-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.action-card .icon{font-size:26px;margin-bottom:5px}
+.action-card .title{font-size:13px;font-weight:600;margin-bottom:2px}
+.action-card .desc{font-size:11px;color:var(--text-light)}
+.special-features{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.special-card{background:#fff;border-radius:14px;padding:12px;cursor:pointer;transition:all .2s;box-shadow:var(--shadow);display:flex;align-items:center;gap:10px}
+.special-card:hover{transform:translateY(-1px);box-shadow:var(--shadow-lg)}
+.special-card .s-icon{font-size:26px;flex-shrink:0}
+.special-card .s-info{flex:1}
+.special-card .s-title{font-size:13px;font-weight:600;margin-bottom:1px}
+.special-card .s-desc{font-size:10px;color:var(--text-light)}
+.special-card .s-badge{background:var(--pink-light);color:var(--pink-dark);font-size:10px;padding:2px 7px;border-radius:10px;flex-shrink:0}
+.special-card .s-badge.vip{background:linear-gradient(135deg,var(--gold-light),#FFE4B5);color:#B8860B}
+.mood-section{margin-bottom:12px}
+.mood-section h3{font-size:13px;font-weight:600;margin-bottom:8px}
+.mood-grid{display:flex;gap:7px;flex-wrap:wrap}
+.mood-btn{padding:6px 12px;border-radius:20px;border:1px solid #f0e0e8;background:#fff;cursor:pointer;font-size:11px;transition:all .2s}
+.mood-btn:hover,.mood-btn.selected{background:var(--pink-light);border-color:var(--pink);color:var(--pink-dark)}
+.tip-card{background:linear-gradient(135deg,var(--gold-light),#FFF8F0);border-radius:14px;padding:12px}
+.tip-card h4{font-size:12px;color:var(--gold);margin-bottom:3px}
+.tip-card p{font-size:11px;color:var(--text-light);line-height:1.5}
+
+/* CHAT */
+.page-chat{display:flex;flex-direction:column;height:100%}
+.chat-messages{flex:1;overflow-y:auto;padding:12px}
+.msg{display:flex;margin-bottom:9px;animation:fadeIn .3s}
+.msg.ai{justify-content:flex-start}
+.msg.user{justify-content:flex-end}
+.msg-bubble{max-width:80%;padding:10px 14px;border-radius:16px;font-size:13px;line-height:1.6;word-break:break-word}
+.msg.ai .msg-bubble{background:#fff;border-bottom-left-radius:4px;box-shadow:var(--shadow)}
+.msg.user .msg-bubble{background:linear-gradient(135deg,var(--pink),#FF9EC6);color:#fff;border-bottom-right-radius:4px}
+.msg-avatar{width:28px;height:28px;border-radius:50%;margin-right:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;background:linear-gradient(135deg,var(--pink-light),#FFE0EC)}
+.msg.user .msg-avatar{margin-right:0;margin-left:7px;order:1}
+.typing{display:flex;gap:4px;padding:10px 14px}
+.typing span{width:5px;height:5px;border-radius:50%;background:var(--pink);animation:typing 1.4s infinite}
+.typing span:nth-child(2){animation-delay:.2s}
+.typing span:nth-child(3){animation-delay:.4s}
+@keyframes typing{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-4px)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.chat-input-area{padding:9px 12px;background:#fff;border-top:1px solid #f0e0e8;display:flex;gap:7px;flex-shrink:0;align-items:center}
+.chat-input{flex:1;padding:8px 14px;border-radius:20px;border:1px solid #f0e0e8;outline:none;font-size:13px;transition:border .2s}
+.chat-input:focus{border-color:var(--pink)}
+.chat-send{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--pink),#FF9EC6);color:#fff;border:none;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.voice-btn{width:36px;height:36px;border-radius:50%;background:#f5f0f0;color:var(--pink);border:none;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+.voice-btn:hover{background:var(--pink-light)}
+.voice-btn.recording{background:var(--pink);color:#fff;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+
+/* SOUND */
+.page-sound{padding:16px;flex:1;overflow-y:auto}
+.page-sound h3{font-size:15px;font-weight:600;margin-bottom:12px}
+.sound-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sound-card{background:#fff;border-radius:16px;padding:18px 12px;text-align:center;cursor:pointer;transition:all .3s;box-shadow:var(--shadow);position:relative}
+.sound-card.playing{background:linear-gradient(135deg,var(--pink-light),#FFE8F0);box-shadow:0 4px 24px rgba(255,126,179,0.3)}
+.sound-card .icon{font-size:34px;margin-bottom:6px}
+.sound-card .name{font-size:13px;font-weight:600;margin-bottom:2px}
+.sound-card .desc{font-size:10px;color:var(--text-light)}
+.sound-card .play-icon{position:absolute;top:7px;right:7px;width:20px;height:20px;border-radius:50%;background:var(--pink);color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px}
+.volume-control{margin-top:14px;background:#fff;border-radius:13px;padding:12px;box-shadow:var(--shadow)}
+.volume-control label{font-size:11px;color:var(--text-light);display:block;margin-bottom:7px}
+.volume-slider{width:100%;-webkit-appearance:none;height:4px;border-radius:2px;background:#f0e0e8;outline:none}
+.volume-slider::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--pink);cursor:pointer}
+.sound-tip{margin-top:12px;background:var(--gold-light);border-radius:11px;padding:11px;font-size:11px;color:var(--text-light);line-height:1.5}
+
+/* 求抱抱 */
+.page-hug{padding:16px;flex:1;overflow-y:auto}
+.hug-hero{background:linear-gradient(135deg,#FFE4EC,#FFF0F8);border-radius:20px;padding:22px;text-align:center;margin-bottom:14px}
+.hug-emoji{font-size:60px;animation:hugBounce 2s ease-in-out infinite;margin-bottom:10px;display:block}
+@keyframes hugBounce{0%,100%{transform:scale(1)}25%{transform:scale(1.1)}50%{transform:scale(1.05)}75%{transform:scale(1.15)}}
+.hug-hero h2{font-size:18px;color:var(--pink-dark);margin-bottom:5px}
+.hug-hero p{font-size:12px;color:var(--text-light);line-height:1.6}
+.hug-btn{width:100%;padding:13px;background:linear-gradient(135deg,var(--pink),#FF9EC6);color:#fff;border:none;border-radius:50px;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:12px;transition:all .3s;box-shadow:var(--shadow-lg)}
+.hug-btn:hover{transform:translateY(-2px)}
+.hug-btn:active{transform:scale(.97)}
+.hug-msgs{display:flex;flex-direction:column;gap:8px}
+.hug-msg{background:#fff;border-radius:14px;padding:12px;box-shadow:var(--shadow);text-align:center;font-size:12px;color:var(--text);line-height:1.6;animation:fadeIn .4s}
+.hug-msg .hug-q{color:var(--pink-dark);font-weight:600;font-size:13px;margin-bottom:5px}
+
+/* 能量签 */
+.page-energy{padding:16px;flex:1;overflow-y:auto}
+.energy-card{background:linear-gradient(135deg,var(--gold-light),#FFF8F0,#FFF0E6);border-radius:22px;padding:24px 18px;text-align:center;margin-bottom:12px;position:relative;overflow:hidden;box-shadow:var(--shadow-lg)}
+.energy-card::before{content:'';position:absolute;top:-25px;right:-25px;width:90px;height:90px;background:radial-gradient(circle,rgba(255,200,150,.3),transparent);border-radius:50%}
+.energy-card .e-date{font-size:10px;color:var(--gold);margin-bottom:7px;letter-spacing:2px}
+.energy-card .e-quote{font-size:15px;color:var(--text);line-height:1.8;font-weight:500;margin-bottom:10px;min-height:70px;display:flex;align-items:center;justify-content:center}
+.energy-card .e-from{font-size:11px;color:var(--text-light);font-style:italic}
+.energy-card .e-label{position:absolute;top:10px;right:14px;font-size:10px;color:var(--gold);background:rgba(212,165,116,.15);padding:2px 9px;border-radius:10px}
+.refresh-btn{width:100%;padding:11px;background:#fff;color:var(--gold);border:2px solid var(--gold);border-radius:50px;font-size:13px;cursor:pointer;margin-bottom:8px;transition:all .2s;font-weight:600}
+.refresh-btn:hover{background:var(--gold-light)}
+.energy-tip{background:#fff;border-radius:14px;padding:12px;box-shadow:var(--shadow)}
+.energy-tip h4{font-size:12px;color:var(--gold);margin-bottom:4px}
+.energy-tip p{font-size:11px;color:var(--text-light);line-height:1.5}
+
+/* 21天打卡 */
+.page-checkin{padding:16px;flex:1;overflow-y:auto}
+.checkin-header{background:linear-gradient(135deg,#E8F5E9,#F1F8E9);border-radius:18px;padding:16px;text-align:center;margin-bottom:12px}
+.checkin-header h3{font-size:15px;color:#388E3C;margin-bottom:3px}
+.checkin-header p{font-size:11px;color:#4CAF50}
+.streak-num{font-size:36px;font-weight:700;color:#4CAF50;line-height:1}
+.streak-label{font-size:11px;color:#388E3C;margin-top:3px}
+.checkin-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:12px}
+.checkin-day{aspect-ratio:1;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;border:2px solid #e0e0e0;background:#fff;color:#ccc;transition:all .2s}
+.checkin-day.done{background:#4CAF50;color:#fff;border-color:#4CAF50}
+.checkin-day.today{background:var(--mint);color:#fff;border-color:var(--mint)}
+.checkin-day.locked{background:#f5f5f5;color:#bbb;border-color:#eee;cursor:not-allowed}
+.checkin-day label{font-size:9px;display:block;line-height:1}
+.mood-checkin{margin-bottom:12px}
+.mood-checkin h4{font-size:13px;font-weight:600;margin-bottom:8px;text-align:center}
+.mood-checkin-grid{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.mood-checkin-btn{padding:7px 12px;border-radius:20px;border:1px solid #e0e0e0;background:#fff;cursor:pointer;font-size:12px;transition:all .2s;display:flex;align-items:center;gap:3px}
+.mood-checkin-btn:hover,.mood-checkin-btn.selected{background:var(--mint);color:#fff;border-color:var(--mint)}
+.checkin-history{background:#fff;border-radius:14px;padding:12px;box-shadow:var(--shadow)}
+.checkin-history h4{font-size:12px;color:var(--text-light);margin-bottom:8px}
+.history-item{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f5f5f5;font-size:11px}
+.history-item:last-child{border-bottom:none}
+.history-item .h-date{color:var(--text-light)}
+.history-item .h-mood{color:var(--mint);font-weight:600}
+
+/* AI解梦 */
+.page-dream{padding:16px;flex:1;overflow-y:auto}
+.dream-hero{background:linear-gradient(135deg,#E8EAF6,#EDE7F6);border-radius:18px;padding:18px;text-align:center;margin-bottom:12px}
+.dream-hero h3{font-size:16px;color:#5C6BC0;margin-bottom:3px}
+.dream-hero p{font-size:11px;color:#7986CB}
+.dream-textarea{width:100%;min-height:90px;padding:12px;border-radius:14px;border:2px solid #e8eaf6;background:#fff;font-size:12px;resize:none;outline:none;font-family:inherit;line-height:1.6;margin-bottom:9px;box-shadow:var(--shadow)}
+.dream-textarea:focus{border-color:var(--lavender)}
+.dream-btn{width:100%;padding:12px;background:linear-gradient(135deg,#7986CB,#9FA8DA);color:#fff;border:none;border-radius:50px;font-size:14px;cursor:pointer;font-weight:600;box-shadow:0 4px 16px rgba(92,107,192,.3);margin-bottom:12px;transition:all .2s}
+.dream-btn:hover{transform:translateY(-2px)}
+.dream-btn:active{transform:scale(.98)}
+.dream-result{background:#fff;border-radius:14px;padding:14px;box-shadow:var(--shadow);display:none}
+.dream-result.show{display:block}
+.dream-result h4{font-size:13px;color:#5C6BC0;margin-bottom:7px}
+.dream-result p{font-size:12px;line-height:1.7;color:var(--text)}
+.dream-tip{background:linear-gradient(135deg,#EDE7F6,#F3E5F5);border-radius:13px;padding:11px;font-size:11px;color:#7E57C2;line-height:1.5;margin-top:12px}
+
+/* 会员 */
+.page-premium{padding:16px;flex:1;overflow-y:auto}
+.premium-hero{background:linear-gradient(135deg,var(--pink),var(--gold));border-radius:20px;padding:22px 18px;color:#fff;text-align:center;margin-bottom:14px}
+.premium-hero h2{font-size:18px;margin-bottom:5px}
+.premium-hero p{font-size:12px;opacity:.9}
+.premium-price{font-size:32px;font-weight:700;margin-top:7px}
+.premium-price small{font-size:13px;font-weight:400;opacity:.8}
+.premium-features{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.feature{background:#fff;border-radius:13px;padding:12px 13px;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow)}
+.feature .f-icon{font-size:20px}
+.feature .f-text h4{font-size:12px;margin-bottom:1px}
+.feature .f-text p{font-size:10px;color:var(--text-light)}
+.qr-section{background:#fff;border-radius:18px;padding:16px;text-align:center;box-shadow:var(--shadow);margin-bottom:10px}
+.qr-section h3{font-size:14px;margin-bottom:3px}
+.qr-section .price-big{font-size:26px;font-weight:700;color:var(--pink);margin:7px 0}
+.qr-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.qr-item{text-align:center}
+.qr-box{width:110px;height:110px;background:#FAFAFA;border-radius:11px;margin:0 auto 5px;display:flex;align-items:center;justify-content:center;border:1px solid #f0e0e8;font-size:36px}
+.qr-item p{font-size:11px;color:var(--text-light)}
+.contact-box{background:var(--pink-light);border-radius:13px;padding:11px;text-align:center;font-size:12px;color:var(--pink-dark)}
+.contact-box strong{font-size:14px;display:block;margin-bottom:1px}
+
+/* 我的 */
+.page-profile{padding:16px;flex:1;overflow-y:auto}
+.profile-card{background:#fff;border-radius:18px;padding:18px;text-align:center;box-shadow:var(--shadow);margin-bottom:12px}
+.profile-avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--pink),#FF9EC6);color:#fff;font-size:22px;display:flex;align-items:center;justify-content:center;margin:0 auto 9px}
+.profile-name{font-size:16px;font-weight:600;margin-bottom:2px}
+.profile-desc{font-size:11px;color:var(--text-light)}
+.stats{display:flex;justify-content:center;gap:18px;margin-top:12px}
+.stat{text-align:center}
+.stat .num{font-size:16px;font-weight:700;color:var(--pink)}
+.stat .label{font-size:10px;color:var(--text-light)}
+.menu-list{display:flex;flex-direction:column;gap:7px}
+.menu-item{background:#fff;border-radius:13px;padding:12px 13px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;box-shadow:var(--shadow);transition:transform .2s}
+.menu-item:hover{transform:translateX(4px)}
+.menu-item .left{display:flex;align-items:center;gap:9px}
+.menu-item .left .mi-icon{font-size:16px}
+.menu-item .right{color:var(--text-light);font-size:11px}
+.safe-tip{background:linear-gradient(135deg,var(--gold-light),#FFF8F0);border-radius:13px;padding:11px;margin-top:12px}
+.safe-tip h4{font-size:11px;color:var(--gold);margin-bottom:3px}
+.safe-tip p{font-size:10px;color:var(--text-light);line-height:1.5}
+
+/* Toast */
+.toast{position:fixed;bottom:75px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.75);color:#fff;padding:9px 18px;border-radius:22px;font-size:12px;z-index:999;animation:fadeInUp .3s}
+@keyframes fadeInUp{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:20px;padding:22px;max-width:320px;width:100%;text-align:center;animation:fadeInUp .3s}
+.modal h3{font-size:15px;margin-bottom:7px;color:var(--pink-dark)}
+.modal p{font-size:12px;color:var(--text-light);line-height:1.5;margin-bottom:14px}
+.modal-btns{display:flex;gap:9px}
+.modal-btn{flex:1;padding:10px;border-radius:50px;border:none;font-size:13px;cursor:pointer;font-weight:600}
+.modal-btn.primary{background:linear-gradient(135deg,var(--pink),#FF9EC6);color:#fff}
+.modal-btn.secondary{background:#f5f0f0;color:var(--text-light)}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <h1>🌸 为你好</h1>
+    <span class="header-right" id="header-status">AI在线</span>
+  </div>
+  <div class="tab-bar">
+    <div class="tab active" onclick="switchTab('home')"><span class="tab-emoji">🏠</span>首页</div>
+    <div class="tab" onclick="switchTab('chat')"><span class="tab-emoji">💬</span>聊天</div>
+    <div class="tab" onclick="switchTab('sound')"><span class="tab-emoji">🎵</span>声音</div>
+    <div class="tab" onclick="switchTab('hug')"><span class="tab-emoji">🤗</span>抱抱</div>
+    <div class="tab" onclick="switchTab('energy')"><span class="tab-emoji">✨</span>能量签</div>
+    <div class="tab" onclick="switchTab('checkin')"><span class="tab-emoji">📅</span>打卡</div>
+    <div class="tab" onclick="switchTab('dream')"><span class="tab-emoji">🌙</span>解梦</div>
+    <div class="tab" onclick="switchTab('premium')"><span class="tab-emoji">💎</span>会员</div>
+  </div>
+  <div class="content">
+
+    <!-- HOME -->
+    <div id="page-home" class="page page-home active">
+      <div class="greeting" id="greeting-text">下午好呀～</div>
+      <div class="greeting-sub" id="greeting-sub">今天心情怎么样？</div>
+      <div class="quick-actions">
+        <div class="action-card" onclick="switchTab('chat')">
+          <div class="icon">💬</div>
+          <div class="title">找小暖聊天</div>
+          <div class="desc">倾诉心事，我来陪你</div>
+        </div>
+        <div class="action-card" onclick="switchTab('sound')">
+          <div class="icon">🎵</div>
+          <div class="title">听治愈声音</div>
+          <div class="desc">雨声·海浪·森林</div>
+        </div>
+      </div>
+      <div class="special-features">
+        <div class="special-card" onclick="switchTab('hug')">
+          <div class="s-icon">🤗</div>
+          <div class="s-info"><div class="s-title">求抱抱</div><div class="s-desc">累了就抱抱，温暖不孤单</div></div>
+          <div class="s-badge">免费</div>
+        </div>
+        <div class="special-card" onclick="switchTab('energy')">
+          <div class="s-icon">✨</div>
+          <div class="s-info"><div class="s-title">能量签</div><div class="s-desc">每天一句，治愈你的心</div></div>
+          <div class="s-badge">免费</div>
+        </div>
+        <div class="special-card" onclick="switchTab('checkin')">
+          <div class="s-icon">📅</div>
+          <div class="s-info"><div class="s-title">21天情绪打卡</div><div class="s-desc">坚持21天，养成好心情</div></div>
+          <div class="s-badge vip">VIP</div>
+        </div>
+        <div class="special-card" onclick="switchTab('dream')">
+          <div class="s-icon">🌙</div>
+          <div class="s-info"><div class="s-title">AI解梦</div><div class="s-desc">告诉我你的梦，我来解读</div></div>
+          <div class="s-badge">免费</div>
+        </div>
+      </div>
+      <div class="mood-section">
+        <h3>现在的心情</h3>
+        <div class="mood-grid">
+          <div class="mood-btn" onclick="quickMood('开心')">😊 开心</div>
+          <div class="mood-btn" onclick="quickMood('平静')">😌 平静</div>
+          <div class="mood-btn" onclick="quickMood('焦虑')">😰 焦虑</div>
+          <div class="mood-btn" onclick="quickMood('难过')">😢 难过</div>
+          <div class="mood-btn" onclick="quickMood('疲惫')">😫 疲惫</div>
+          <div class="mood-btn" onclick="quickMood('孤独')">🥺 孤独</div>
+        </div>
+      </div>
+      <div class="tip-card">
+        <h4>💡 今日暖心话</h4>
+        <p id="daily-tip">你不必一直坚强，累了就休息，这不是软弱，是对自己温柔。</p>
+      </div>
+    </div>
+
+    <!-- CHAT -->
+    <div id="page-chat" class="page page-chat">
+      <div class="chat-messages" id="chat-messages">
+        <div class="msg ai">
+          <div class="msg-avatar">🌸</div>
+          <div class="msg-bubble">嗨～我是小暖，你的情绪陪伴伙伴。今天发生了什么？想聊聊吗？我在这里认真听～</div>
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <button class="voice-btn" id="voice-btn" onclick="toggleVoice()">🎤</button>
+        <input class="chat-input" id="chat-input" placeholder="说说你的心事..." onkeydown="if(event.key==='Enter')sendMessage()">
+        <button class="chat-send" onclick="sendMessage()">➤</button>
+      </div>
+    </div>
+
+    <!-- SOUND -->
+    <div id="page-sound" class="page page-sound">
+      <h3>🎵 治愈声音</h3>
+      <div class="sound-grid">
+        <div class="sound-card" onclick="toggleSound('rain')"><div class="play-icon" id="play-rain">▶</div><div class="icon">🌧️</div><div class="name">下雨天</div><div class="desc">淅沥沥的雨声</div></div>
+        <div class="sound-card" onclick="toggleSound('ocean')"><div class="play-icon" id="play-ocean">▶</div><div class="icon">🌊</div><div class="name">海浪声</div><div class="desc">潮起潮落</div></div>
+        <div class="sound-card" onclick="toggleSound('forest')"><div class="play-icon" id="play-forest">▶</div><div class="icon">🌿</div><div class="name">森林</div><div class="desc">鸟鸣与微风</div></div>
+        <div class="sound-card" onclick="toggleSound('cafe')"><div class="play-icon" id="play-cafe">▶</div><div class="icon">☕</div><div class="name">咖啡馆</div><div class="desc">温暖嘈杂</div></div>
+        <div class="sound-card" onclick="toggleSound('fire')"><div class="play-icon" id="play-fire">▶</div><div class="icon">🔥</div><div class="name">壁炉</div><div class="desc">噼啪火焰声</div></div>
+        <div class="sound-card" onclick="toggleSound('wind')"><div class="play-icon" id="play-wind">▶</div><div class="icon">🍃</div><div class="name">微风</div><div class="desc">轻柔的风声</div></div>
+      </div>
+      <div class="volume-control">
+        <label>🔊 音量调节</label>
+        <input type="range" class="volume-slider" min="0" max="100" value="50" oninput="setVolume(this.value/100)">
+      </div>
+      <div class="sound-tip">💡 建议戴上耳机，闭上眼睛。每次使用不超过60分钟，让声音带你进入宁静的世界～</div>
+    </div>
+
+    <!-- 求抱抱 -->
+    <div id="page-hug" class="page page-hug">
+      <div class="hug-hero">
+        <span class="hug-emoji">🤗</span>
+        <h2>过来，我抱抱你</h2>
+        <p>无论发生什么，你都值得被温柔对待。<br>如果累了，就在这里停一停。</p>
+      </div>
+      <button class="hug-btn" onclick="doHug()">🤗 给我一个拥抱</button>
+      <div id="hug-messages" class="hug-msgs"></div>
+    </div>
+
+    <!-- 能量签 -->
+    <div id="page-energy" class="page page-energy">
+      <div class="energy-card">
+        <span class="e-label">今日能量签</span>
+        <div class="e-date" id="e-date"></div>
+        <div class="e-quote" id="e-quote">正在获取今天的能量...</div>
+        <div class="e-from" id="e-from"></div>
+      </div>
+      <button class="refresh-btn" onclick="refreshEnergy()">🔄 换一句</button>
+      <button class="refresh-btn" style="border-color:var(--lavender);color:var(--lavender)" onclick="saveEnergy()">💾 收藏这句</button>
+      <div class="energy-tip">
+        <h4>🌟 每日能量签</h4>
+        <p>每天来这里获取一句温暖的话。能量签可以收藏，随时翻看。当你觉得低落的时候，它们会给你力量。</p>
+      </div>
+    </div>
+
+    <!-- 21天打卡 -->
+    <div id="page-checkin" class="page page-checkin">
+      <div class="checkin-header">
+        <h3>📅 21天情绪打卡</h3>
+        <div class="streak-num" id="streak-num">0</div>
+        <div class="streak-label">连续打卡天数</div>
+        <p style="font-size:11px;color:#4CAF50;margin-top:5px" id="checkin-tip">今天还没打卡哦～</p>
+      </div>
+      <div class="checkin-grid" id="checkin-grid"></div>
+      <div class="mood-checkin">
+        <h4>🌸 今天感觉怎么样？</h4>
+        <div class="mood-checkin-grid">
+          <button class="mood-checkin-btn" onclick="doCheckin('超棒',this)">🌟 超棒</button>
+          <button class="mood-checkin-btn" onclick="doCheckin('还不错',this)">😊 还不错</button>
+          <button class="mood-checkin-btn" onclick="doCheckin('一般',this)">😐 一般</button>
+          <button class="mood-checkin-btn" onclick="doCheckin('有点糟',this)">😔 有点糟</button>
+        </div>
+      </div>
+      <div class="checkin-history">
+        <h4>📝 最近记录</h4>
+        <div id="history-list"></div>
+      </div>
+    </div>
+
+    <!-- AI解梦 -->
+    <div id="page-dream" class="page page-dream">
+      <div class="dream-hero">
+        <h3>🌙 AI智能解梦</h3>
+        <p>告诉我你梦到了什么，我来帮你解读</p>
+      </div>
+      <textarea class="dream-textarea" id="dream-input" placeholder="描述一下你的梦境，比如：&#10;• 梦到自己在飞&#10;• 梦到去世的亲人&#10;• 梦到考试迟到..."></textarea>
+      <button class="dream-btn" onclick="interpretDream()">🔮 开始解梦</button>
+      <div class="dream-result" id="dream-result">
+        <h4>💫 解梦结果</h4>
+        <p id="dream-interpretation"></p>
+      </div>
+      <div class="dream-tip">💡 梦境往往反映我们潜意识中的情感和想法。解梦不是迷信，而是用心理学的方式帮你理解自己内心的声音。</div>
+    </div>
+
+    <!-- 会员 -->
+    <div id="page-premium" class="page page-premium">
+      <div class="premium-hero">
+        <h2>✨ 开通会员</h2>
+        <p>解锁全部治愈体验</p>
+        <div class="premium-price">¥9.9<small>/月</small></div>
+      </div>
+      <div class="premium-features">
+        <div class="feature"><div class="f-icon">🤖</div><div class="f-text"><h4>AI深度对话</h4><p>无限次智能对话支持</p></div></div>
+        <div class="feature"><div class="f-icon">🎵</div><div class="f-text"><h4>全部治愈声音</h4><p>解锁更多声音场景</p></div></div>
+        <div class="feature"><div class="f-icon">📅</div><div class="f-text"><h4>21天情绪打卡</h4><p>追踪情绪变化</p></div></div>
+        <div class="feature"><div class="f-icon">💝</div><div class="f-text"><h4>专属抱抱语录</h4><p>更多温暖内容</p></div></div>
+        <div class="feature"><div class="f-icon">🌙</div><div class="f-text"><h4>深度解梦</h4><p>更详细的梦境分析</p></div></div>
+      </div>
+      <div class="qr-section">
+        <h3>扫码开通会员</h3>
+        <div class="price-big">¥9.9 <small style="font-size:13px;color:var(--text-light)">/月</small></div>
+        <div class="qr-grid">
+          <div class="qr-item">
+            <div class="qr-box">💚</div>
+            <p>微信支付</p>
+            <p style="color:var(--pink);font-weight:600">微信号: z6ys8866</p>
+          </div>
+          <div class="qr-item">
+            <div class="qr-box">💙</div>
+            <p>支付宝</p>
+            <p style="color:var(--pink);font-weight:600">转账至 z6ys8866</p>
+          </div>
+        </div>
+        <div class="contact-box" style="margin-top:12px">
+          💬 <strong>付款后加微信 z6ys8866</strong><br>备注"开通会员"，立即开通
+        </div>
+      </div>
+    </div>
+
+    <!-- 我的 -->
+    <div id="page-profile" class="page page-profile">
+      <div class="profile-card">
+        <div class="profile-avatar">🌸</div>
+        <div class="profile-name">小暖的伙伴</div>
+        <div class="profile-desc">正在被温柔对待中 💕</div>
+        <div class="stats">
+          <div class="stat"><div class="num" id="stat-chat">0</div><div class="label">聊天次数</div></div>
+          <div class="stat"><div class="num" id="stat-days">1</div><div class="label">陪伴天数</div></div>
+          <div class="stat"><div class="num" id="stat-sound">0</div><div class="label">声音疗愈</div></div>
+        </div>
+      </div>
+      <div id="saved-quotes" style="display:none">
+        <div class="profile-card" style="padding:14px">
+          <h4 style="font-size:13px;margin-bottom:8px">✨ 收藏的能量签</h4>
+          <div id="quotes-list"></div>
+        </div>
+      </div>
+      <div class="menu-list">
+        <div class="menu-item" onclick="switchTab('premium')"><div class="left"><span class="mi-icon">💎</span><span>开通会员</span></div><div class="right">¥9.9/月 ›</div></div>
+        <div class="menu-item" onclick="switchTab('checkin')"><div class="left"><span class="mi-icon">📅</span><span>21天打卡</span></div><div class="right">›</div></div>
+        <div class="menu-item" onclick="clearData()"><div class="left"><span class="mi-icon">🗑️</span><span>清除数据</span></div><div class="right">›</div></div>
+        <div class="menu-item"><div class="left"><span class="mi-icon">💬</span><span>联系客服</span></div><div class="right">微信 z6ys8866 ›</div></div>
+      </div>
+      <div class="safe-tip">
+        <h4>🛡️ 安全提示</h4>
+        <p>「为你好」是你的情绪陪伴工具，不能替代专业心理咨询。如果你正在经历严重的情绪困扰，请拨打24小时心理援助热线：<strong>400-161-9995</strong></p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast" style="display:none"></div>
+
+<div class="modal-overlay" id="vip-modal">
+  <div class="modal">
+    <h3>💎 会员专享</h3>
+    <p>「21天情绪打卡」是会员专属功能<br>开通会员解锁全部功能</p>
+    <div class="modal-btns">
+      <button class="modal-btn secondary" onclick="closeModal()">稍后</button>
+      <button class="modal-btn primary" onclick="closeModal();switchTab('premium')">去开通</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchTab(name){
+  var tabs=['home','chat','sound','hug','energy','checkin','dream','premium'];
+  document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('active',tabs[i]===name);});
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+  document.getElementById('page-'+name).classList.add('active');
+  if(name==='chat')document.getElementById('chat-input').focus();
+  if(name==='energy')renderEnergy();
+  if(name==='checkin')renderCheckin();
+  if(name==='dream')document.getElementById('dream-result').classList.remove('show');
+}
+function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.style.display='block';setTimeout(function(){t.style.display='none';},2500);}
+function closeModal(){document.getElementById('vip-modal').classList.remove('show');}
+
+(function(){
+  var h=new Date().getHours(),g='你好呀～',s='今天心情怎么样？';
+  if(h<6){g='夜深了～';s='还没睡吗？我陪你聊聊';}
+  else if(h<9){g='早上好呀～';s='新的一天，你准备好了吗？';}
+  else if(h<12){g='上午好～';s='今天状态怎么样？';}
+  else if(h<14){g='中午好～';s='记得吃饭哦，照顾好自己';}
+  else if(h<18){g='下午好呀～';s='今天辛苦了吧';}
+  else if(h<22){g='晚上好～';s='今天过得怎么样？';}
+  else{g='夜深了～';s='辛苦一天了，放松一下吧';}
+  document.getElementById('greeting-text').textContent=g;
+  document.getElementById('greeting-sub').textContent=s;
+  var tips=['你不必一直坚强，累了就休息，这不是软弱，是对自己温柔。','每一天都是新的开始，昨天的遗憾不用带到今天。','你的感受是真实的，不需要和任何人比较。','被理解是一种奢侈，但每个人都值得拥有。','慢慢来，比较快。','世界那么大，总有人会懂你。','你已经很努力了，给自己一个拥抱吧。','难过的时候，悲伤也是被允许的情绪。'];
+  document.getElementById('daily-tip').textContent=tips[Math.floor(Math.random()*tips.length)];
+})();
+
+var TONGYI_KEY='sk-35a992012bed45fe81b4cd45395f76c8';
+var TONGYI_URL='https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
+var chatHistory=[];
+var chatCount=parseInt(localStorage.getItem('chatCount')||'0');
+var firstVisit=localStorage.getItem('firstVisit');
+if(!firstVisit){firstVisit=Date.now();localStorage.setItem('firstVisit',firstVisit);}else{var days=Math.floor((Date.now()-parseInt(firstVisit))/86400000)+1;document.getElementById('stat-days').textContent=days;}
+document.getElementById('stat-chat').textContent=chatCount;
+document.getElementById('stat-sound').textContent=localStorage.getItem('soundCount')||'0';
+
+async function callTongyi(messages){
+  try{
+    var resp=await fetch(TONGYI_URL,{
+      method:'POST',
+      headers:{'Authorization':'Bearer '+TONGYI_KEY,'Content-Type':'application/json'},
+      body:JSON.stringify({model:'qwen-plus',messages:messages,max_tokens:500,temperature:0.8})
+    });
+    if(!resp.ok)throw new Error('API '+resp.status);
+    var data=await resp.json();
+    return data.choices[0].message.content;
+  }catch(e){return null;}
+}
+
+var FALLBACKS={
+  sad:['能感受到你现在很不容易。有时候哭出来比憋着好多了，眼泪是身体帮你释放情绪的方式呀。你不是软弱，只是很真实。','你说的这些，我能感觉到重量。不用假装没事，在我这里，你可以慢慢来。','你愿意说出来已经很勇敢了。有些事情，倾诉本身就是治愈的开始。'],
+  anxious:['来，先做一件事：把注意力放在呼吸上。吸气～屏住～慢慢吐出来。焦虑的时候大脑会骗你，让你觉得事情比实际严重得多。你比想象中更强大。','紧张的时候，告诉自己：这只是身体在保护你。你现在安全。深呼吸～'],
+  lonely:['你觉得没人理解你，这种感觉真的很难受。但你愿意来找我聊天，说明你的内心是渴望连接的，而渴望连接的人，本身就一点都不孤单。'],
+  exhausted:['你今天已经撑了很久了吧。先放下"要坚强"这件事——累了就休息不是软弱，就像手机没电要充电一样正常。','听到你说累，我的心也跟着沉了一下。辛苦了呢。不管今天完成了什么，光是活着就很了不起了。'],
+  happy:['呀，听到你开心，我也跟着开心起来了！你的快乐是有温度的，希望这份好心情能持续久一点呀～'],
+  confused:['你在经历一个很难选择的时刻，这种感觉说明你在认真思考未来呀。其实没有"完美选择"，只有"适合现在的选择"。不管选什么，你都有能力把路走好。'],
+  angry:['你现在一定很生气吧？生气是一种很真实的情绪，不需要否认它。你可以骂出来、说出来——发泄出来比憋着好。'],
+  greeting:['嗨～欢迎回来，我在这里呢。今天过得怎么样？想说说话的时候，我随时都在。'],
+  normal:['嗯，我在认真听。继续说吧，我很想知道你在想什么。','你继续说，我都在呢～','嗯嗯，你分享的我都听到了，慢慢来～','你愿意说出来本身就很好，我在这里陪你。']
+};
+function getFallback(text){
+  var t=text.toLowerCase(),key='normal';
+  if(/不[是想说想告诉想发泄]|想哭|难受|痛苦|压抑|委屈|难过/.test(t))key='sad';
+  else if(/焦虑|紧张|害怕|恐惧|担心|不安/.test(t))key='anxious';
+  else if(/孤独|寂寞|一个人|没人|孤单/.test(t))key='lonely';
+  else if(/累|疲惫|压力|崩溃|撑不住|无力/.test(t))key='exhausted';
+  else if(/开心|高兴|快乐|棒|幸福|美好|太好了/.test(t))key='happy';
+  else if(/迷茫|困惑|不知道|怎么办|选择|纠结/.test(t))key='confused';
+  else if(/生气|愤怒|讨厌|恨|气死/.test(t))key='angry';
+  else if(/谢谢|感激|感恩|你好|嗨|在|hi/.test(t))key='greeting';
+  var list=FALLBACKS[key]||FALLBACKS.normal;
+  return list[Math.floor(Math.random()*list.length)];
+}
+function escapeHtml(t){var d=document.createElement('div');d.textContent=t;return d.innerHTML;}
+
+async function sendMessage(){
+  var input=document.getElementById('chat-input');
+  var text=input.value.trim();
+  if(!text)return;
+  input.value='';
+  var msgs=document.getElementById('chat-messages');
+  var userDiv=document.createElement('div');userDiv.className='msg user';
+  userDiv.innerHTML='<div class="msg-avatar">😊</div><div class="msg-bubble">'+escapeHtml(text)+'</div>';
+  msgs.appendChild(userDiv);msgs.scrollTop=msgs.scrollHeight;
+  var typingDiv=document.createElement('div');typingDiv.className='msg ai';typingDiv.id='typing';
+  typingDiv.innerHTML='<div class="msg-avatar">🌸</div><div class="typing"><span></span><span></span><span></span></div>';
+  msgs.appendChild(typingDiv);msgs.scrollTop=msgs.scrollHeight;
+  chatHistory.push({role:'user',content:text});
+  chatCount++;localStorage.setItem('chatCount',chatCount);
+  document.getElementById('stat-chat').textContent=chatCount;
+  var systemPrompt={role:'system',content:'你是"小暖"，一个温柔、治愈系的AI情绪陪伴伙伴。说话风格：温暖、细腻、有同理心，像贴心的朋友。简短发3-5句，不说教，不生硬，永远不用"首先其次"这种结构。直接给出温暖回应。'};
+  var reply=await callTongyi([systemPrompt,...chatHistory]);
+  if(!reply){reply=getFallback(text);document.getElementById('header-status').textContent='离线模式';}
+  else{document.getElementById('header-status').textContent='AI在线';}
+  var typing=document.getElementById('typing');if(typing)typing.remove();
+  var aiDiv=document.createElement('div');aiDiv.className='msg ai';
+  aiDiv.innerHTML='<div class="msg-avatar">🌸</div><div class="msg-bubble">'+escapeHtml(reply)+'</div>';
+  msgs.appendChild(aiDiv);msgs.scrollTop=msgs.scrollHeight;
+  chatHistory.push({role:'assistant',content:reply});
+}
+function quickMood(mood){switchTab('chat');document.getElementById('chat-input').value='我现在感觉'+mood;setTimeout(sendMessage,300);}
+
+var recognition=null,isRecording=false;
+function toggleVoice(){
+  if(!('webkitSpeechRecognition' in window)&&!('SpeechRecognition' in window)){showToast('您的浏览器不支持语音输入');return;}
+  if(isRecording){stopVoice();return;}
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  recognition=new SR();recognition.lang='zh-CN';recognition.continuous=false;recognition.interimResults=false;
+  recognition.onresult=function(e){document.getElementById('chat-input').value=e.results[0][0].transcript;stopVoice();sendMessage();};
+  recognition.onerror=function(){stopVoice();showToast('语音识别出错');};
+  recognition.onend=function(){stopVoice();};
+  recognition.start();isRecording=true;document.getElementById('voice-btn').classList.add('recording');showToast('🎤 正在听...说完了自动发送');
+}
+function stopVoice(){if(recognition){try{recognition.stop();}catch(e){}}isRecording=false;document.getElementById('voice-btn').classList.remove('recording');}
+
+var audioCtx=null,activeNodes=null,currentSound=null;
+function getAudioCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function createNoiseBuffer(ctx,dur,type){
+  var sr=ctx.sampleRate,len=sr*dur;
+  var buf=ctx.createBuffer(2,len,sr);
+  var L=buf.getChannelData(0),R=buf.getChannelData(1);
+  if(type==='white'){for(var i=0;i<len;i++){L[i]=Math.random()*2-1;R[i]=Math.random()*2-1;}}
+  else if(type==='brown'){var last=0;for(var i=0;i<len;i++){var w=Math.random()*2-1;last=(last+0.02*w)/1.02;L[i]=last*3.5;R[i]=last*3.5;}}
+  else{var b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;for(var i=0;i<len;i++){var w=Math.random()*2-1;b0=0.99886*b0+w*0.0555179;b1=0.99332*b1+w*0.0750759;b2=0.969*b2+w*0.1538520;b3=0.8665*b3+w*0.3104856;b4=0.55*b4+w*0.5329522;b5=-0.7616*b5-w*0.0168980;var p=b0+b1+b2+b3+b4+b5+b6+w*0.5362;b6=w*0.115926;L[i]=p*0.11;R[i]=p*0.11;}}
+  return buf;
+}
+function playSound(type){
+  stopSound();
+  var ctx=getAudioCtx();
+  var master=ctx.createGain();master.gain.value=0.5;master.connect(ctx.destination);
+  var sources=[];
+  if(type==='rain'){
+    var buf=createNoiseBuffer(ctx,4,'brown');var src=ctx.createBufferSource();src.buffer=buf;src.loop=true;
+    var hp=ctx.createBiquadFilter();hp.type='highpass';hp.frequency.value=800;
+    var lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=4000;
+    src.connect(hp).connect(lp).connect(master);src.start();sources.push(src);
+    var buf2=createNoiseBuffer(ctx,2,'white');var src2=ctx.createBufferSource();src2.buffer=buf2;src2.loop=true;
+    var hp2=ctx.createBiquadFilter();hp2.type='highpass';hp2.frequency.value=3000;
+    var g2=ctx.createGain();g2.gain.value=0.15;
+    src2.connect(hp2).connect(g2).connect(master);src2.start();sources.push(src2);
+  }
+  if(type==='ocean'){
+    var buf=createNoiseBuffer(ctx,8,'brown');var src=ctx.createBufferSource();src.buffer=buf;src.loop=true;
+    var lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=600;
+    var wg=ctx.createGain();wg.gain.value=0.3;
+    src.connect(lp).connect(wg).connect(master);src.start();sources.push(src);
+    var lfo=ctx.createOscillator();lfo.frequency.value=0.12;
+    var lg=ctx.createGain();lg.gain.value=0.25;
+    lfo.connect(lg).connect(wg.gain);lfo.start();sources.push(lfo);
+  }
+  if(type==='forest'){
+    var buf=createNoiseBuffer(ctx,6,'pink');var src=ctx.createBufferSource();src.buffer=buf;src.loop=true;
+    var lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=2000;
+    var g=ctx.createGain();g.gain.value=0.25;
+    src.connect(lp).connect(g).connect(master);src.start();sources.push(src);
+    var o1=ctx.createOscillator();o1.type='sine';o1.frequency.value=2200;
+    var g1=ctx.createGain();g1.gain.value=0.04;
+    o1.connect(g1).connect(master);o1.start();sources.push(o1);
+    var mo=ctx.createOscillator();mo.frequency.value=3;
+    var mg=ctx.createGain();mg.gain.value=600;
+    mo.connect(mg).connect(o1.frequency);mo.start();sources.push(mo);
+  }
+  if(type==='cafe'){
+    var buf=createNoiseBuffer(ctx,6,'brown');var src=ctx.createBufferSource();src.buffer=buf;src.loop=true;
+    var bp=ctx.createBiquadFilter();bp.type='bandpass';bp.frequency.value=400;bp.Q.value=0.5;
+    var g=ctx.createGain();g.gain.value=0.6;
+    src.connect(bp).connect(g).connect(master);src.start();sources.push(src);
+    var buf2=createNoiseBuffer(ctx,4,'white');var src2=ctx.createBufferSource();src2.buffer=buf2;src2.loop=true;
+    var bp2=ctx.createBiquadFilter();bp2.type='bandpass';bp2.frequency.value=1200;bp2.Q.value=0.3;
+    var g2=ctx.createGain();g2.gain.value=0.08;
+    src2.connect(bp2).connect(g2).connect(master);src2.start();sources.push(src2);
+  }
+  if(type==='fire'){
+    var buf=createNoiseBuffer(ctx,4,'brown');var src=ctx.createBufferSource();src.buffer=buf;src.loop=true;
+    var lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=800;
+    var g=ctx.createGain();g.gain.value=0.4;
+    src.connect(lp).connect(g).connect(master);src.start();sources.push(src);
+    var crackle=ctx.createOscillator();crackle.type='sawtooth';crackle.frequency.value=200;
+    var cg=ctx.createGain();cg.gain.value=0.05;
+    var cf=ctx.createBiquadFilter();cf.type='bandpass';cf.frequency.value=300;cf.Q.value=1;
+    crackle.connect(cf).connect(cg).connect(master);crackle.start();sources.push(crackle);
+    var lfo=ctx.createOscillator();lfo.frequency.value=8;
+    var lg=ctx.createGain();lg.gain.value=0.08;
+    lfo.connect(lg).connect(cg.gain);lfo.start();sources.push(lfo);
+  }
+  if(type==='wind'){
+    var buf=createNoiseBuffer(ctx,5,'pink');var src=ctx.createBufferSource();src.buffer=buf;src.loop=true;
+    var hp=ctx.createBiquadFilter();hp.type='highpass';hp.frequency.value=200;
+    var lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=1200;
+    var g=ctx.createGain();g.gain.value=0.3;
+    src.connect(hp).connect(lp).connect(g).connect(master);src.start();sources.push(src);
+    var lfo=ctx.createOscillator();lfo.frequency.value=0.08;
+    var lg=ctx.createGain();lg.gain.value=0.15;
+    lfo.connect(lg).connect(g.gain);lfo.start();sources.push(lfo);
+  }
+  activeNodes={gain:master,sources};currentSound=type;
+  var cnt=parseInt(localStorage.getItem('soundCount')||'0')+1;localStorage.setItem('soundCount',cnt);
+  document.getElementById('stat-sound').textContent=cnt;
+}
+function stopSound(){
+  if(activeNodes){activeNodes.sources.forEach(function(s){try{s.stop();}catch(e){}});try{activeNodes.gain.disconnect();}catch(e){}activeNodes=null;}
+  currentSound=null;
+}
+function toggleSound(type){
+  document.querySelectorAll('.sound-card').forEach(function(c){c.classList.remove('playing');});
+  document.querySelectorAll('.play-icon').forEach(function(i){i.textContent='▶';});
+  if(currentSound===type){stopSound();return;}
+  playSound(type);
+  document.querySelectorAll('.sound-card').forEach(function(c){if(c.getAttribute('onclick').indexOf(type)>-1)c.classList.add('playing');});
+  var icon=document.getElementById('play-'+type);if(icon)icon.textContent='⏸';
+}
+function setVolume(v){if(activeNodes)activeNodes.gain.gain.value=Math.max(0,Math.min(1,v));}
+
+var HUGS=[
+  {q:'好累啊，感觉撑不下去了...',a:'来，先抱一下。你已经很努力了，不需要再撑了。休息一下，你值得被温柔对待。'},
+  {q:'觉得自己好失败，什么都做不好',a:'抱抱你。你不是失败，你只是暂时还没看到自己的光芒。每个人都有自己的节奏，慢慢来。'},
+  {q:'好孤独，没有人理解我',a:'我在这里陪着你。被理解是很珍贵的事，但你要知道，你的存在本身就很有价值。'},
+  {q:'好难过，忍不住想哭',a:'哭吧，眼泪不是软弱，是身体在帮你释放。把难过哭出来，心里会轻松一些。我在呢。'},
+  {q:'好焦虑，什么都担心',a:'抱抱。先深呼吸，跟我一起：吸气...屏住...慢慢吐出来。焦虑的时候，大脑会骗你。你比你以为的更强大。'},
+  {q:'心情很低落，觉得自己不够好',a:'你知道吗，光是愿意承认自己心情不好这件事，已经很勇敢了。抱抱你，你已经足够好了。'},
+  {q:'好迷茫，不知道该怎么办',a:'迷茫说明你在思考，这是好事。抱抱，先停一停，不用急着找到答案，你已经在路上了。'},
+  {q:'最近压力好大...',a:'抱抱。压力大的时候，告诉自己：这不是我的问题，这是外部的东西压过来了。给自己松口气的空间吧。'},
+  {q:'被误解了，好委屈',a:'被误解真的很委屈。抱抱你，不是所有的委屈都需要解释，但你的感受是真实的，值得被看见。'},
+  {q:'觉得自己不够好...',a:'抱抱。现在的你，就是最好的你。不需要比较，不需要证明什么，你本身就值得被爱。'},
+  {q:'想放弃一切了',a:'抱抱你紧紧的。不管发生了什么，我都在这里陪着你。你的感受我听到了，你不是一个人。我们一起慢慢来，好吗？'}
+];
+function doHug(){
+  var msg=HUGS[Math.floor(Math.random()*HUGS.length)];
+  var msgs=document.getElementById('hug-messages');
+  var div=document.createElement('div');div.className='hug-msg';
+  div.innerHTML='<div class="hug-q">🤗 '+msg.q+'</div><div style="color:var(--text-light);font-size:11px;margin-top:5px">'+msg.a+'</div>';
+  msgs.prepend(div);showToast('🤗 抱抱你～你值得被温柔对待');
+}
+
+var ENERGY=[
+  {q:'你不必一直坚强，偶尔的脆弱不会让你变得软弱，反而让你更像一个真实的人。',from:'—— 给自己一个深呼吸'},
+  {q:'每一天都是新的开始，昨天的遗憾不必带到今天来。',from:'—— 轻装前行'},
+  {q:'慢一点没关系，走得稳比走得快更重要。',from:'—— 给自己时间'},
+  {q:'你已经在发光了，只是有时候黑暗让你看不清。',from:'—— 相信自己'},
+  {q:'累了就休息，这不是放弃，是对自己最基本的温柔。',from:'—— 善待自己'},
+  {q:'世界上有千百种生活方式，没有哪一种是标准的正确答案。',from:'—— 接纳自己'},
+  {q:'难过的时候，允许自己难过，这是情绪在说话，不是软弱。',from:'—— 倾听内心'},
+  {q:'你不需要成为任何人期待的样子，你只需要成为你自己。',from:'—— 做真实的自己'},
+  {q:'有时候停下来喘口气，是为了走更远的路。',from:'—— 休息的力量'},
+  {q:'你的感受是真实的，不需要为此道歉，不需要为此解释。',from:'—— 被允许的情绪'},
+  {q:'生活不是比赛，不必和别人比较进度，你在自己的时区里。',from:'—— 自己的节奏'},
+  {q:'你比自己想象的更勇敢，比自己认为的更强大。',from:'—— 认识自己'},
+  {q:'世界上最重要的事，就是你好好活着。',from:'—— 活着本身就是意义'},
+  {q:'焦虑是因为你在乎，允许自己焦虑，然后慢慢放下。',from:'—— 与焦虑共处'},
+  {q:'你今天已经做得很好，不必等到完美才值得被爱。',from:'—— 此刻的你值得'},
+  {q:'悲伤会来的，但也会走的。就像天气，没有永远的雨季。',from:'—— 雨季会过去'},
+  {q:'爱自己，是终身浪漫的开始。',from:'—— 王尔德'},
+  {q:'生活不在于追求完美，而在于接受不完美。',from:'—— 与自己和解'},
+  {q:'你很重要。你的存在本身，就是对世界的礼物。',from:'—— 被需要的你'},
+  {q:'当你不知道怎么办的时候，就先对自己好一点。',from:'—— 最简单的答案'}
+];
+var curEnergyIdx=-1;
+function renderEnergy(){
+  var today=new Date().toDateString();
+  var savedIdx=localStorage.getItem('energyDate')===today?parseInt(localStorage.getItem('energyIdx')):Math.floor(Math.random()*ENERGY.length);
+  curEnergyIdx=savedIdx;
+  if(localStorage.getItem('energyDate')!==today){localStorage.setItem('energyDate',today);localStorage.setItem('energyIdx',savedIdx);}
+  var q=ENERGY[curEnergyIdx];
+  var months=['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
+  var days=['周日','周一','周二','周三','周四','周五','周六'];
+  var now=new Date();
+  document.getElementById('e-date').textContent=months[now.getMonth()]+now.getDate()+'日 · '+days[now.getDay()];
+  document.getElementById('e-quote').textContent=q.q;
+  document.getElementById('e-from').textContent=q.from;
+}
+function refreshEnergy(){
+  var newIdx;do{newIdx=Math.floor(Math.random()*ENERGY.length);}while(newIdx===curEnergyIdx);
+  curEnergyIdx=newIdx;
+  var q=ENERGY[newIdx];
+  document.getElementById('e-quote').textContent=q.q;
+  document.getElementById('e-from').textContent=q.from;
+  showToast('✨ 换了一句能量签～');
+}
+function saveEnergy(){
+  var q=ENERGY[curEnergyIdx];
+  var saved=JSON.parse(localStorage.getItem('savedQuotes')||'[]');
+  if(saved.length>=20){showToast('收藏已满，最多20句');return;}
+  saved.unshift(q);localStorage.setItem('savedQuotes',JSON.stringify(saved));
+  renderSavedQuotes();showToast('💾 已收藏能量签！');
+}
+function renderSavedQuotes(){
+  var saved=JSON.parse(localStorage.getItem('savedQuotes')||'[]');
+  var el=document.getElementById('saved-quotes');
+  var list=document.getElementById('quotes-list');
+  if(saved.length===0){el.style.display='none';return;}
+  el.style.display='block';
+  list.innerHTML=saved.slice(0,5).map(function(q){return'<p style="font-size:11px;color:var(--text);line-height:1.6;margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid #f5f5f5">"'+q.q+'"<br><span style="font-size:10px;color:var(--text-light)">'+q.from+'</span></p>';}).join('');
+}
+
+function renderCheckin(){
+  var checkins=JSON.parse(localStorage.getItem('checkins')||'{}');
+  var today=new Date();
+  var todayStr=today.toISOString().split('T')[0];
+  var dayNames=['日','一','二','三','四','五','六'];
+  var grid=document.getElementById('checkin-grid');
+  grid.innerHTML='';
+  dayNames.forEach(function(d){var h=document.createElement('div');h.style.cssText='text-align:center;font-size:10px;color:var(--text-light);font-weight:600';h.textContent=d;grid.appendChild(h);});
+  var startDate=new Date(today);startDate.setDate(startDate.getDate()-20);
+  var streak=0,checkedToday=false;
+  for(var i=0;i<21;i++){
+    var d=new Date(startDate);d.setDate(d.getDate()+i);
+    var dateStr=d.toISOString().split('T')[0];
+    var isToday=dateStr===todayStr;
+    var isFuture=d>today;
+    var hasMood=checkins[dateStr];
+    if(hasMood&&!isFuture){streak++;if(isToday)checkedToday=true;}
+    var cell=document.createElement('div');cell.className='checkin-day';
+    if(hasMood)cell.classList.add('done');
+    if(isToday)cell.classList.add('today');
+    if(isFuture)cell.classList.add('locked');
+    cell.innerHTML='<label>'+d.getDate()+'</label>';
+    grid.appendChild(cell);
+  }
+  document.getElementById('streak-num').textContent=streak;
+  document.getElementById('checkin-tip').textContent=checkedToday?'✅ 今天已打卡！太棒了～':(today.getHours()<20?'今天还没打卡哦～':'今天最后机会啦，快来打卡！');
+  var histList=document.getElementById('history-list');
+  var entries=Object.entries(checkins).sort(function(a,b){return b[0].localeCompare(a[0]);}).slice(0,7);
+  if(entries.length===0){histList.innerHTML='<p style="font-size:11px;color:var(--text-light);text-align:center;padding:10px">还没有打卡记录，今天开始吧～</p>';}
+  else{histList.innerHTML=entries.map(function(e){var d=new Date(e[0]+'T12:00:00');return'<div class="history-item"><span class="h-date">'+(d.getMonth()+1)+'月'+d.getDate()+'日</span><span class="h-mood">'+e[1]+'</span></div>';}).join('');}
+}
+function doCheckin(mood,btn){
+  var isVip=localStorage.getItem('isVip')==='true';
+  if(!isVip){document.getElementById('vip-modal').classList.add('show');return;}
+  document.querySelectorAll('.mood-checkin-btn').forEach(function(b){b.classList.remove('selected');});
+  btn.classList.add('selected');
+  var today=new Date().toISOString().split('T')[0];
+  var checkins=JSON.parse(localStorage.getItem('checkins')||'{}');
+  checkins[today]=mood;localStorage.setItem('checkins',JSON.stringify(checkins));
+  showToast('✅ 打卡成功！坚持就是力量～');
+  renderCheckin();
+}
+
+var DREAM={
+  flying:{s:'飞翔',m:'飞翔通常象征着对自由的渴望，或代表你在生活中正在突破某种限制。如果你飞得轻松愉快，说明你内心充满力量和希望。'},
+  water:{s:'水',m:'水象征情绪和潜意识。平静的湖水代表内心的安宁；波涛汹涌的海浪可能代表强烈的情绪波动。'},
+  falling:{s:'坠落',m:'坠落通常反映一种失控感或缺乏安全感。可能暗示你在某段关系或某个项目中感到支撑不足。'},
+  school:{s:'考试/学校',m:'梦见考试通常代表你在现实生活中正在接受某种"检验"，可能是工作上的考核或重要决策。'},
+  death:{s:'死亡',m:'梦中的死亡往往象征某种结束或转变。可能意味着你正在告别旧的自己，准备迎接新的开始。'},
+  chase:{s:'被追赶',m:'被追赶的梦通常代表你正在逃避某件你需要面对的事情。也许是某个不想处理的情绪或问题。'},
+  tooth:{s:'牙齿掉落',m:'牙齿常与自尊、自信和外表焦虑相关。牙齿掉落可能反映你对形象的自卑或担心在某件事上"丢脸"。'},
+  animal:{s:'动物',m:'动物通常代表我们本能的一面。温顺的动物可能代表内心的善良，凶猛的动物可能代表被压抑的愤怒。'},
+  house:{s:'房子',m:'房子象征你的内心世界。梦中的房子代表你的心理状态——房间代表不同的情绪和记忆。'}
+};
+async function interpretDream(){
+  var input=document.getElementById('dream-input').value.trim();
+  if(!input){showToast('请先描述你的梦境');return;}
+  var resultDiv=document.getElementById('dream-result');
+  var interpP=document.getElementById('dream-interpretation');
+  resultDiv.classList.add('show');
+  interpP.textContent='🔮 正在分析梦境...';
+  var systemPrompt={role:'system',content:'你是专业的梦境分析师，结合心理学（弗洛伊德+荣格）视角解读梦境。要求：温暖有同理心，不使用"首先其次"生硬结构。回复3-4段，每段2-3句，语言自然亲切像朋友聊天。'};
+  var userPrompt={role:'user',content:'请帮我解读这个梦：'+input};
+  var interpretation=await callTongyi([systemPrompt,userPrompt]);
+  if(!interpretation){
+    var symbols=Object.keys(DREAM).filter(function(k){return input.indexOf(k)>-1;}).map(function(k){return'【'+DREAM[k].s+'】'+DREAM[k].m;});
+    if(symbols.length>0){interpretation=symbols.join('\n\n');}
+    else{interpretation='听起来这是一个对你有特别意义的梦。梦中的每一个元素都可能是你潜意识的投射——它们可能代表你最近的情绪、担忧，或者深藏的渴望。试着回忆：这个梦带给你的第一感受是什么？是害怕、开心、还是困惑？感受往往比细节更重要，因为它更接近梦想要告诉你的核心。';}
+  }
+  interpP.textContent=interpretation;
+}
+
+function clearData(){if(confirm('确定要清除所有数据吗？这将删除你的打卡记录、聊天记录和收藏。')){localStorage.clear();showToast('数据已清除');location.reload();}}
+
+document.addEventListener('DOMContentLoaded',function(){renderEnergy();renderSavedQuotes();renderCheckin();document.getElementById('chat-input').focus();});
+</script>
+</body>
+</html>
